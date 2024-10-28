@@ -90,6 +90,49 @@ Osoba* obrisiElement(Osoba *head, char *prezime) {
     return head;
 }
 
+Osoba* dodajIza(Osoba *head, char *ime, char *prezime, int godina_rodenja, char *targetPrezime) {
+    Osoba *target = pronadiElement(head,targetPrezime);
+    if (!target) {
+        printf("Greška pri alokaciji memorije!\n");
+        return head;
+    }
+    strcpy(nova_osoba->ime, ime);
+    strcpy(nova_osoba->prezime, prezime);
+    nova_osoba->godina_rodenja = godina_rodenja;
+    nova_osoba->next = target->next;
+    target->next = nova_osoba;
+
+Osoba* dodajIspred(Osoba *head, char *ime, char *prezime, int godina_rodenja, char *targetPrezime) {
+     Osoba * nova_osoba = (Osoba*)malloc(sizeof(Osoba));
+    if (!nova_osoba) {
+        printf("Greška pri alokaciji memorije!\n");
+        return head;
+    }
+    strcpy(nova_osoba->ime, ime);
+    strcpy(nova_osoba->prezime, prezime);
+    nova_osoba->godina_rodenja = godina_rodenja;
+   
+     if(!head||strcmp(head->prezime,targetPrezime)==0)
+     {
+         nova_osoba->next = head;
+         return nova_osoba;
+     }
+
+   Osoba *temp=head; 
+   while(temp->next&&strcmp(temp->next->prezime, targetPrezime)!=0)
+   { temp=temp->next;}
+
+
+   if(!temp->next)
+   {
+       printf("Osoba s prezimenom %s nije pronađena\n",targetPrezime);
+       free(nova_osoba);
+       return head;
+   }
+   nova_osoba->next=temp->next;
+   temp->next=nova_osoba;
+   return head
+}
 int main() {
     Osoba *head = NULL;
     int izbor;
@@ -157,6 +200,10 @@ int main() {
         head = head->next;
         free(temp);
     }
+
+    return 0;
+}
+
 
     return 0;
 }
