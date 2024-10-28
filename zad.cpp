@@ -5,67 +5,158 @@
 
 using namespace std;
 
-struct Student {
-    string ime;
-    string prezime;
-    int bodovi;
-};
+typedef struct Osoba {
+    char ime[50];
+    char prezime[50];
+    int godina_rodenja;
+    struct Osoba *next;
+} Osoba;
 
-int brojRedakaUDatoteci(const string& nazivDatoteke) {
-    ifstream datoteka(nazivDatoteke);
-    string linija;
-    int brojRedaka = 0;
 
-    if (datoteka.is_open()) {
-        while (getline(datoteka, linija)) {
-            brojRedaka++;
-        }
-        datoteka.close();
+Osoba* dodajNaPocetak(Osoba *head, char *ime, char *prezime, int godina_rodenja) {
+    Osoba * nova_osoba = (Osoba*)malloc(sizeof(Osoba));
+    if (!nova_osoba) {
+        printf("Greška pri alokaciji memorije!\n");
+        return head;
     }
+    strcpy(nova_osoba->ime, ime);
+    strcpy(nova_osoba->prezime, prezime);
+    nova_osoba->godina_rodenja = godina_rodenja;
+    nova_osoba->next = head;
+    return nova_osoba;
 
-    return brojRedaka;
-}
-
-void ucitajStudente(Student* studenti, int brojStudenata, const string& nazivDatoteke, int& maxBodovi) {
-    ifstream datoteka(nazivDatoteke);
-    maxBodovi = 0;
-
-    if (datoteka.is_open()) {
-        for (int i = 0; i < brojStudenata; i++) {
-            datoteka >> studenti[i].ime >> studenti[i].prezime >> studenti[i].bodovi;
-            if (studenti[i].bodovi > maxBodovi) {
-                maxBodovi = studenti[i].bodovi;
-            }
-        }
-        datoteka.close();
+void ispisiListu(Osoba *head) {
+    Osoba *temp = head;
+    while (temp) {
+        printf("Ime: %s, Prezime: %s, Godina rođenja: %d\n", temp->ime, temp->prezime, temp->godina_rodenja);
+        temp = temp->next;
     }
 }
 
-void ispisiStudente(const Student* studenti, int brojStudenata, int maxBodovi) {
-    for (int i = 0; i < brojStudenata; i++) {
-        double relativniBodovi = (double)studenti[i].bodovi / maxBodovi * 100;
-        cout << studenti[i].ime << " " << studenti[i].prezime
-             << " - Apsolutni bodovi: " << studenti[i].bodovi
-             << ", Relativni bodovi: " << relativniBodovi << "%" << endl;
+
+Osoba* dodajNaKraj(Osoba *head, char *ime, char *prezime, int godina_rodenja) {
+    Osoba * nova_osoba = (Osoba*)malloc(sizeof(Osoba));
+    if (!nova_osoba) {
+        printf("Greška pri alokaciji memorije!\n");
+        return head;
     }
+    strcpy(nova_osoba->ime, ime);
+    strcpy(nova_osoba->prezime, prezime);
+    nova_osoba->godina_rodenja = godina_rodenja;
+    nova_osoba->next = NULL;
+
+    if (head == NULL)
+        return nova_osoba;
+
+    Osoba *temp = head;
+    while (temp->next)
+        temp = temp->next;
+    temp->next = nova_osoba;
+    return head;
+}
+
+// 
+Osoba* pronadiElement(Osoba *head, char *prezime) {
+    Osoba *temp = head;
+    while (temp) {
+        if (strcmp(temp->prezime, prezime) == 0)
+            return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+
+Osoba* obrisiElement(Osoba *head, char *prezime) {
+    Osoba *temp = head, *prev = NULL;
+
+    while (temp && strcmp(temp->prezime, prezime) != 0) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    if (!temp) {
+        printf("Osoba s prezimenom %s nije pronađena.\n", prezime);
+        return head;
+    }
+
+    if (!prev) {
+        head = temp->next;
+    } else {
+        prev->next = temp->next;
+    }
+
+    free(temp);
+    return head;
 }
 
 int main() {
-    string nazivDatoteke = "studenti.txt";
-    int brojStudenata = brojRedakaUDatoteci(nazivDatoteke);
+    Osoba *head = NULL;
+    int izbor;
+    char ime[50], prezime[50];
+    int godina_rodenja;
 
-    if (brojStudenata == 0) {
-        cout << "Datoteka je prazna ili ne postoji." << endl;
-        return 1;
+    do {
+        printf("\nOdaberite opciju:\n");
+        printf("1. Dodaj na početak\n");
+        printf("2. Ispiši listu\n");
+        printf("3. Dodaj na kraj\n");
+        printf("4. Pronađi po prezimenu\n");
+        printf("5. Obriši po prezimenu\n");
+        printf("0. Izlaz\n");
+        printf("Izbor: ");
+        scanf("%d", &izbor);
+
+        switch (izbor) {
+            case 1:
+                printf("Unesite ime: ");
+                scanf("%s", ime);
+                printf("Unesite prezime: ");
+                scanf("%s", prezime);
+                printf("Unesite godinu rođenja: ");
+                scanf("%d", &godina_rodenja);
+                head = dodajNaPocetak(head, ime, prezime, godina_rodenja);
+                break;
+            case 2:
+                ispisiListu(head);
+                break;
+            case 3:
+                printf("Unesite ime: ");
+                scanf("%s", ime);
+                printf("Unesite prezime: ");
+                scanf("%s", prezime);
+                printf("Unesite godinu rođenja: ");
+                scanf("%d", &godina_rodenja);
+                head = dodajNaKraj(head, ime, prezime, godina_rodenja);
+                break;
+            case 4:
+                printf("Unesite prezime za pretragu: ");
+                scanf("%s", prezime);
+                Osoba *pronadena = pronadiElement(head, prezime);
+                if (pronadena)
+                    printf("Pronađena osoba - Ime: %s, Prezime: %s, Godina rođenja: %d\n", pronadena->ime, pronadena->prezime, pronadena->godina_rodenja);
+                else
+                    printf("Osoba s prezimenom %s nije pronađena.\n", prezime);
+                break;
+            case 5:
+                printf("Unesite prezime za brisanje: ");
+                scanf("%s", prezime);
+                head = obrisiElement(head, prezime);
+                break;
+            case 0:
+                printf("Izlaz iz programa.\n");
+                break;
+            default:
+                printf("Pogrešan unos, pokušajte ponovno.\n");
+        }
+    } while (izbor != 0);
+
+    
+    while (head) {
+        Osoba *temp = head;
+        head = head->next;
+        free(temp);
     }
-
-    Student* studenti = new Student[brojStudenata];
-    int maxBodovi = 0;
-
-    ucitajStudente(studenti, brojStudenata, nazivDatoteke, maxBodovi);
-    ispisiStudente(studenti, brojStudenata, maxBodovi);
-
-    delete[] studenti;
 
     return 0;
 }
